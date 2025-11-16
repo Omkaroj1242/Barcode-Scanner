@@ -1,12 +1,26 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
+import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 
 const Barcode = () => {
     const videoRef = useRef(null);
     const [result, setResult] = useState("");
 
     useEffect(() => {
-        const reader = new BrowserMultiFormatReader();
+        // restrict decoder to barcode formats only (no QR_CODE)
+        const hints = new Map();
+        const barcodeFormats = [
+            BarcodeFormat.CODE_128,
+            BarcodeFormat.CODE_39,
+            BarcodeFormat.EAN_13,
+            BarcodeFormat.EAN_8,
+            BarcodeFormat.UPC_A,
+            BarcodeFormat.UPC_E,
+            BarcodeFormat.ITF,
+            BarcodeFormat.CODABAR
+        ];
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, barcodeFormats);
+        const reader = new BrowserMultiFormatReader(hints);
 
         // start decoding from default device
         reader.decodeFromVideoDevice(null, videoRef.current, (res, err) => {
@@ -22,7 +36,7 @@ const Barcode = () => {
         });
 
         return () => {
-            // stop camera and decoding
+            // stop camera and decoding 
             try {
                 reader.reset();
             } catch (e) {
